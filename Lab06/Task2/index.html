@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Типу заміточки :D</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input, textarea, button {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+        .edit-btn {
+            background-color: #007bff;
+        }
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h2>Додати замітку</h2>
+    <form onsubmit="addNote(event)">
+        <input type="text" id="title" placeholder="Заголовок" required>
+        <textarea id="content" placeholder="Текст замітки" required></textarea>
+        <button type="submit">Додати</button>
+    </form>
+
+    <h2>Список заміток</h2>
+    <ul id="notesList"></ul>
+
+    <script>
+        async function fetchNotes() {
+            let response = await fetch('get_notes.php');
+            let notes = await response.json();
+            let list = document.getElementById('notesList');
+            list.innerHTML = notes.map(note => `
+                <li>
+                    <div>
+                        <strong>${note.title}</strong><br>${note.content}
+                    </div>
+                    <div class="btn-group">
+                        <button class="edit-btn" onclick="editNote(${note.id}, '${note.title}', '${note.content}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        async function addNote(event) {
+            event.preventDefault();
+            let title = document.getElementById('title').value;
+            let content = document.getElementById('content').value;
+
+            let response = await fetch('add_note.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+
+            let result = await response.json();
+            alert(result.message || result.error);
+            fetchNotes();
+        }
+
+        async function deleteNote(id) {
+            if (!confirm("Ви впевнені?")) return;
+
+            let response = await fetch('delete_note.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+
+            let result = await response.json();
+            alert(result.message || result.error);
+            fetchNotes();
+        }
+
+        async function editNote(id, oldTitle, oldContent) {
+            let newTitle = prompt("Введіть новий заголовок:", oldTitle);
+            let newContent = prompt("Введіть новий текст:", oldContent);
+
+            if (newTitle && newContent) {
+                let response = await fetch('update_note.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, title: newTitle, content: newContent })
+                });
+
+                let result = await response.json();
+                alert(result.message || result.error);
+                fetchNotes();
+            }
+        }
+        fetchNotes();
+    </script>
+</body>
+</html>

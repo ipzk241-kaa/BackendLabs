@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизація / Реєстрація</title>
+    <script>
+        async function registerUser(event) {
+            event.preventDefault();
+            let formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            let response = await fetch('register.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            let result = await response.json();
+            alert(result.success || result.error);
+            if (result.success) {
+                window.location.href = 'auth.html';
+            }
+        }
+
+        async function loginUser(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            let response = await fetch('login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            let result = await response.json();
+            if (result.success) {
+                sessionStorage.setItem('user_id', result.user_id);
+                window.location.href = 'index.html'; 
+            } else {
+                alert('Невірні дані!');
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Авторизація або Реєстрація</h2>
+
+    <div id="loginForm">
+        <h3>Вхід</h3>
+        <form onsubmit="loginUser(event)">
+            <label>Email:</label>
+            <input type="email" id="loginEmail" required><br>
+            <label>Пароль:</label>
+            <input type="password" id="loginPassword" required><br>
+            <button type="submit">Увійти</button>
+        </form>
+        <p>Ще не зареєстровані? <a href="#" onclick="showRegisterForm()">Реєстрація</a></p>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+        <h3>Реєстрація</h3>
+        <form onsubmit="registerUser(event)">
+            <label>Ім'я:</label>
+            <input type="text" id="name" required><br>
+            <label>Email:</label>
+            <input type="email" id="email" required><br>
+            <label>Пароль:</label>
+            <input type="password" id="password" required><br>
+            <button type="submit">Зареєструватися</button>
+        </form>
+        <p>Вже є акаунт? <a href="#" onclick="showLoginForm()">Вхід</a></p>
+    </div>
+
+    <script>
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
