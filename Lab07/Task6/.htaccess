@@ -1,0 +1,2 @@
+php_value auto_prepend_file "D:/wamp64/www/Labs/Lab07/Task6/traffic_logger.php"
+ErrorDocument 404 /Labs/Lab07/Task6/force_404.php
